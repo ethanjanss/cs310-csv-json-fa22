@@ -71,7 +71,30 @@ public class Converter {
             Iterator<String[]> iterator = full.iterator();
             
             /* INSERT YOUR CODE HERE */
+            JSONObject json = new JSONObject();
+            JSONArray column = new JSONArray();
+            JSONArray row = new JSONArray();
+            JSONArray data = new JSONArray();
+            JSONArray holder;
+            String[] info = iterator.next();
             
+            for(int i=0; i < info.length; i++){
+                column.add(info[i]);
+            }
+                while(iterator.hasNext()){
+                    holder = new JSONArray();
+                    info = iterator.next();
+                    row.add(info[0]);
+                    for(int i = 1; i < info.length; i++){
+                        int stringHolder = Integer.parseInt(info[i]);
+                        holder.add(stringHolder);
+                    }
+                    data.add(holder);
+                }
+                json.put("rowHeaders", row);
+                json.put("colHeaders", column);
+                json.put("data", data);
+                results = JSONValue.toJSONString(json);
         }
         catch(Exception e) { e.printStackTrace(); }
         
@@ -94,7 +117,27 @@ public class Converter {
             CSVWriter csvWriter = new CSVWriter(writer, ',', '"', '\\', "\n");
             
             /* INSERT YOUR CODE HERE */
+            JSONObject json = (JSONObject)parser.parse(jsonString);
+            JSONArray column = (JSONArray)json.get("colHeaders");
+            JSONArray row = (JSONArray)json.get("rowHeaders");
+            JSONArray data = (JSONArray)json.get("data");
+            JSONArray holder;
+            String[] info = new String[column.size()];
             
+            for(int i=0; i < column.size(); i++){
+                info[i] = (String)column.get(i);
+            }
+            csvWriter.writeNext(info);
+            for(int i = 0; i < data.size(); i++){
+            holder = (JSONArray) data.get(i);
+            info = new String[holder.size() + 1];
+            info[0] = (String) row.get(i);
+            for(int j = 0; j < holder.size(); j++){
+                info[j +1] = Long.toString((long)holder.get(j));
+            }
+            csvWriter.writeNext(info);
+        }
+        results = writer.toString();          
         }
         catch(Exception e) { e.printStackTrace(); }
         
